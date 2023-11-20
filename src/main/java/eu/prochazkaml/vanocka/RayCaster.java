@@ -32,7 +32,7 @@ public class RayCaster {
 		for(int x = 0; x < vw; x++) {
 			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
 			double angle = playerAngle + relangle;
-			double px = playerX, py = playerY;
+			double px = playerX, py = playerY, oldpx, oldpy;
 
 			double distance = 0;
 
@@ -46,13 +46,13 @@ public class RayCaster {
 
 			int wallColor = 0xFFFFFF;
 
+			double toTravelX, toTravelY;
+
 			if(Math.abs(horizUnitDeltaY) < Math.abs(vertUnitDeltaX)) {
 				// The fired ray will mainly go left/right
 
 				double dx = Math.signum(vertUnitDeltaX), dy = horizUnitDeltaY;
 				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
-
-				double toTravelX, toTravelY;
 
 				// Figure out how much to "travel" in the X direction initally
 
@@ -68,38 +68,40 @@ public class RayCaster {
 					System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
 
 					while(true) {
-						// TODO - move this block of code further
+						oldpx = px;
+						oldpy = py;
+
+						px += toTravelX;
+						py += toTravelY;
+
+						System.err.printf("- %f/%f + %f/%f = %f/%f\n", oldpx, oldpy, toTravelX, toTravelY, px, py);
 
 						if(getBlock((int)px, (int)py) != '.') {
 							System.err.printf(" - Reached vertical wall at %f/%f, distance %f\n", px, py, distance);
+							distance += Math.hypot(toTravelX, toTravelY);
 							break;
 						}
 
-						if((int)py != (int)(py + toTravelY)) {
-							System.err.printf(" - CROSSED HORIZONTAL BOUNDARY (%d/%d)\n", (int)px, (int)(py + toTravelY));
+						if((int)oldpy != (int)py) {
+							System.err.printf(" - CROSSED HORIZONTAL BOUNDARY (%d/%d)\n", (int)oldpx, (int)py);
 
 							double ratio = 0;
 
 							if(toTravelY > 0) {
-								ratio = (((int)(py + toTravelY)) - py) / toTravelY;
+								ratio = (((int)py) - oldpy) / toTravelY;
 							} else {
-								ratio = (((int)(py) - py)) / toTravelY;
+								ratio = (((int)oldpy) - oldpy) / toTravelY;
 							}
 
-							System.err.printf(" - *** %f (%f / %d)\n", ratio, py, (int)(py));
+							System.err.printf(" - *** %f (%f / %d)\n", ratio, oldpy, (int)(oldpy));
 
-							if(getBlock((int)px, (int)(py + toTravelY)) != '.') {
+							if(getBlock((int)oldpx, (int)py) != '.') {
 								distance += ratio * Math.hypot(toTravelX, toTravelY);
-								System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d), distance %f\n", px + toTravelX * ratio, py + toTravelY * ratio, (int)px, (int)(py + toTravelY), distance);
+								System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d), distance %f\n", oldpx + toTravelX * ratio, oldpy + toTravelY * ratio, (int)oldpx, (int)py, distance);
 								wallColor = 0xE0E0E0;
 								break;
 							}
 						}
-
-						System.err.printf("- %f/%f -> %f/%f\n", px, py, px + toTravelX, py + toTravelY);
-
-						px += toTravelX;
-						py += toTravelY;
 
 						toTravelX = dx;
 						toTravelY = dy;
@@ -118,6 +120,14 @@ public class RayCaster {
 
 				double dx = vertUnitDeltaX, dy = Math.signum(horizUnitDeltaY);
 				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
+
+				if(dy > 0) { // Down
+
+				} else if(dy < 0) {
+
+				} else {
+					continue; // Should never happen, but Java screams otherwise
+				}
 			}
 
 			// Perform fish-eye correction
