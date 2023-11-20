@@ -20,57 +20,119 @@ public class RayCaster {
 		playerFOV = _playerFOV;
 	}
 
-	private char getBlock(int x, int y) throws Exception {
+	private char getBlock(int x, int y) {
 		//System.out.printf("Read block %d/%d %f\n", x, y, playerX);
-		return map.map[y][x];		
+		if(x >= map.w || y >= map.h || x < 0 || y < 0) return '0';
+
+		return map.map[y][x];
 	}
 
 	public void render() {
-		final double step = .01;
-
+//		for(int x = 0; x < 20; x++) {
 		for(int x = 0; x < vw; x++) {
-			double absangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
-			double angle = playerAngle + absangle;
-			double dx = Math.cos(angle) * step, dy = Math.sin(angle) * step;
-
-			// Who cares about optimization anyways.
-
+			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
+			double angle = playerAngle + relangle;
 			double px = playerX, py = playerY;
 
 			double distance = 0;
 
-			char c;
-			
-			try {
-				while(true) {
-					c = getBlock((int)px, (int)py);
+			if(angle == 0) angle += Double.MIN_VALUE; // Prevents NaN
+			double tmptan = Math.tan(angle);
 
-					if(c != '.') {
-						// System.out.printf("%d: %f (%f/%f %f/%f %d/%d %f)\n", x, distance, px, py, px - dx, py - dy, (int)px - (int)(px - dx), (int)py - (int)(py - dy), Math.hypot(dx, dy));
-						break;
+			double horizUnitDeltaY = tmptan * Math.signum(Math.cos(angle));
+			double vertUnitDeltaX = 1 / tmptan * Math.signum(Math.sin(angle));
+
+			System.err.printf("%d: %f %f/%f\n", x, angle, vertUnitDeltaX, horizUnitDeltaY);
+
+			int wallColor = 0xFFFFFF;
+
+			if(Math.abs(horizUnitDeltaY) < Math.abs(vertUnitDeltaX)) {
+				// The fired ray will mainly go left/right
+
+				double dx = Math.signum(vertUnitDeltaX), dy = horizUnitDeltaY;
+				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
+
+				double toTravelX, toTravelY;
+
+				// Figure out how much to "travel" in the X direction initally
+
+				// TODO - finish the other quadrants
+
+				if(dx > 0) { // Right
+					// TODO - CHECK IF THE MATH CHECKS OUT
+
+					toTravelX = Math.floor(px + 1) - px;
+
+					toTravelY = dy * toTravelX / dx;
+
+					System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
+
+					while(true) {
+						// TODO - move this block of code further
+
+						if(getBlock((int)px, (int)py) != '.') {
+							System.err.printf(" - Reached vertical wall at %f/%f, distance %f\n", px, py, distance);
+							break;
+						}
+
+						if((int)py != (int)(py + toTravelY)) {
+							System.err.printf(" - CROSSED HORIZONTAL BOUNDARY (%d/%d)\n", (int)px, (int)(py + toTravelY));
+
+							double ratio = 0;
+
+							if(toTravelY > 0) {
+								ratio = (((int)(py + toTravelY)) - py) / toTravelY;
+							} else {
+								ratio = (((int)(py) - py)) / toTravelY;
+							}
+
+							System.err.printf(" - *** %f (%f / %d)\n", ratio, py, (int)(py));
+
+							if(getBlock((int)px, (int)(py + toTravelY)) != '.') {
+								distance += ratio * Math.hypot(toTravelX, toTravelY);
+								System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d), distance %f\n", px + toTravelX * ratio, py + toTravelY * ratio, (int)px, (int)(py + toTravelY), distance);
+								wallColor = 0xE0E0E0;
+								break;
+							}
+						}
+
+						System.err.printf("- %f/%f -> %f/%f\n", px, py, px + toTravelX, py + toTravelY);
+
+						px += toTravelX;
+						py += toTravelY;
+
+						toTravelX = dx;
+						toTravelY = dy;
+
+						distance += Math.hypot(dx, dy);
+
+						System.err.printf(" - Moved to: %f/%f\n", px, py);
 					}
-
-					px += dx;
-					py += dy;
-					distance += step;
+				} else if(dx < 0) { // Left
+					toTravelX = Math.floor(px) - px;
+				} else {
+					continue; // Should never happen, but Java screams otherwise
 				}
+			} else {
+				// The fired ray will mainly go up/down
 
-				distance *= Math.cos(absangle);
-
-				double ix = px - Math.floor(px), iy = py - Math.floor(py);
-
-				int colourIfTrue = 0xFFFFFF;
-
-				if(ix - iy >= 0) colourIfTrue -= 0x101010;
-
-				if(1 - ix - iy >= 0) colourIfTrue -= 0x202020;
-
-				this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, colourIfTrue);
-
-				// System.out.printf("%d: %.02f %f\n", x, angle, distance);
-			} catch(Exception e) {
-				// System.out.printf("%d: could not draw, too bad\n", x);
+				double dx = vertUnitDeltaX, dy = Math.signum(horizUnitDeltaY);
+				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
 			}
+
+			// Perform fish-eye correction
+
+			distance *= Math.cos(relangle);
+
+			// Render this column of pixels
+
+			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, wallColor);
+
+			// TODO - shade based on the distance
+
+			// this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, interpolateColours(wallColor, 0x000000, distance / 64.f));
+
+			// System.err.printf("%d: %.02f %f\n", x, angle, distance);
 		}
 	}
 
