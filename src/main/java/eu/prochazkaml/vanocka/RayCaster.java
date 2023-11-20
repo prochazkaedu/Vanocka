@@ -28,7 +28,7 @@ public class RayCaster {
 	}
 
 	public void render() {
-//		for(int x = 0; x < 20; x++) {
+//		for(int x = 38; x < 43; x++) {
 		for(int x = 0; x < vw; x++) {
 			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
 			double angle = playerAngle + relangle;
@@ -59,7 +59,7 @@ public class RayCaster {
 				// TODO - finish the other quadrants
 
 				if(dx > 0) { // Right
-					// TODO - CHECK IF THE MATH CHECKS OUT
+					System.err.printf(" - RAY GOING RIGHT\n");
 
 					toTravelX = Math.floor(px + 1) - px;
 
@@ -76,12 +76,6 @@ public class RayCaster {
 
 						System.err.printf("- %f/%f + %f/%f = %f/%f\n", oldpx, oldpy, toTravelX, toTravelY, px, py);
 
-						if(getBlock((int)px, (int)py) != '.') {
-							System.err.printf(" - Reached vertical wall at %f/%f, distance %f\n", px, py, distance);
-							distance += Math.hypot(toTravelX, toTravelY);
-							break;
-						}
-
 						if((int)oldpy != (int)py) {
 							System.err.printf(" - CROSSED HORIZONTAL BOUNDARY (%d/%d)\n", (int)oldpx, (int)py);
 
@@ -96,17 +90,21 @@ public class RayCaster {
 							System.err.printf(" - *** %f (%f / %d)\n", ratio, oldpy, (int)(oldpy));
 
 							if(getBlock((int)oldpx, (int)py) != '.') {
-								distance += ratio * Math.hypot(toTravelX, toTravelY);
-								System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d), distance %f\n", oldpx + toTravelX * ratio, oldpy + toTravelY * ratio, (int)oldpx, (int)py, distance);
+								px = oldpx + toTravelX * ratio;
+								py = oldpy + toTravelY * ratio;
+								System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d)\n", px, py, (int)oldpx, (int)py);
 								wallColor = 0xE0E0E0;
 								break;
 							}
 						}
 
+						if(getBlock((int)px, (int)py) != '.') {
+							System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n", px, py, (int)px, (int)py);
+							break;
+						}
+
 						toTravelX = dx;
 						toTravelY = dy;
-
-						distance += Math.hypot(dx, dy);
 
 						System.err.printf(" - Moved to: %f/%f\n", px, py);
 					}
@@ -122,7 +120,55 @@ public class RayCaster {
 				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
 
 				if(dy > 0) { // Down
+					System.err.printf(" - RAY GOING DOWN\n");
 
+					toTravelY = Math.floor(py + 1) - py;
+
+					toTravelX = dx * toTravelY / dy;
+
+					System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
+
+					while(true) {
+						oldpx = px;
+						oldpy = py;
+
+						px += toTravelX;
+						py += toTravelY;
+
+						System.err.printf("- %f/%f + %f/%f = %f/%f\n", oldpx, oldpy, toTravelX, toTravelY, px, py);
+
+						if((int)oldpx != (int)px) {
+							System.err.printf(" - CROSSED VERTICAL BOUNDARY (%d/%d)\n", (int)px, (int)oldpy);
+
+							double ratio = 0;
+
+							if(toTravelX > 0) {
+								ratio = (((int)px) - oldpx) / toTravelX;
+							} else {
+								ratio = (((int)oldpx) - oldpx) / toTravelX;
+							}
+
+							System.err.printf(" - *** %f (%f / %d)\n", ratio, oldpx, (int)(oldpx));
+
+							if(getBlock((int)px, (int)oldpy) != '.') {
+								px = oldpx + toTravelX * ratio;
+								py = oldpy + toTravelY * ratio;
+								System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n", oldpx + toTravelX * ratio, oldpy + toTravelY * ratio, (int)px, (int)oldpy);
+								break;
+							}
+						}
+
+						if(getBlock((int)px, (int)py) != '.') {
+							System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d)\n", px, py, (int)px, (int)py);
+							wallColor = 0xE0E0E0;
+							break;
+						}
+
+						toTravelX = dx;
+						toTravelY = dy;
+
+						System.err.printf(" - Moved to: %f/%f\n", px, py);
+					}
 				} else if(dy < 0) {
 
 				} else {
@@ -132,7 +178,7 @@ public class RayCaster {
 
 			// Perform fish-eye correction
 
-			distance *= Math.cos(relangle);
+			distance = Math.hypot(playerX - px, playerY - py) * Math.cos(relangle);
 
 			// Render this column of pixels
 
