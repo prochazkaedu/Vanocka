@@ -128,10 +128,6 @@ public class RayCaster {
 
 			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, wallColor);
 
-			// TODO - shade based on the distance
-
-			// this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, interpolateColours(wallColor, 0x000000, distance / 64.f));
-
 			// System.err.printf("%d: %.02f %f\n", x, angle, distance);
 		}
 	}
@@ -139,6 +135,8 @@ public class RayCaster {
 	void drawColumn(int x, double val, int colourCeiling, int colourFloor, int colourWall) {
 		int intval = (int)val;
 		
+		colourWall = interpolateColours(colourWall, 0x808080, Math.min(val / 100, .5));
+
 		for(int y = 0; y < fb.h / 2; y++) {
 			if(y == intval)
 				fb.pixels[x][y] = interpolateColours(colourWall, colourCeiling, val);
