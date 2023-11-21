@@ -22,9 +22,13 @@ public class vanocka {
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
 		});
 
-		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3.f);
+		boolean debugOutput = false;
 
-		while(true) {
+		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3.f, debugOutput);
+
+		if(debugOutput) {
+			testCaster.render();
+		} else while(true) {
 /*			for(int x = 0; x < fb.w; x++)
 				for(int y = 0; y < fb.h; y++)
 					fb.pixels[x][y] = colors[(x - y + off + 10000) % 12];
