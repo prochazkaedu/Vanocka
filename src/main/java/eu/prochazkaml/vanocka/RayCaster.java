@@ -7,17 +7,23 @@ public class RayCaster {
 	public double playerX, playerY, playerAngle;
 	public final double playerFOV;
 	public final int vw, vh;
+	public final boolean debugOutput;
 
-	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV) {
+	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV, boolean _debugOutput) {
 		fb = _fb;
 		map = _map;
 		vw = _viewportWidth;
 		vh = _viewportHeight;
+		debugOutput = _debugOutput;
 
 		playerX = map.playerSpawnX;
 		playerY = map.playerSpawnY;
 		playerAngle = map.playerAngle;
 		playerFOV = _playerFOV;
+	}
+
+	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV) {
+		this(_fb, _map, _viewportWidth, _viewportHeight, _playerFOV, true);
 	}
 
 	private char getBlock(int x, int y) {
@@ -54,15 +60,12 @@ public class RayCaster {
 				double dx = Math.signum(vertUnitDeltaX), dy = horizUnitDeltaY;
 				System.err.printf("- Incrementing X by %f, Y by %f.\n", dx, dy);
 
-				// Figure out how much to "travel" in the X direction initally
-
 				// TODO - finish the other quadrants
 
 				if(dx > 0) { // Right
 					System.err.printf(" - RAY GOING RIGHT\n");
 
 					toTravelX = Math.floor(px + 1) - px;
-
 					toTravelY = dy * toTravelX / dx;
 
 					System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
@@ -123,7 +126,6 @@ public class RayCaster {
 					System.err.printf(" - RAY GOING DOWN\n");
 
 					toTravelY = Math.floor(py + 1) - py;
-
 					toTravelX = dx * toTravelY / dy;
 
 					System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
