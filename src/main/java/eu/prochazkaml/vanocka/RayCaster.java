@@ -41,12 +41,53 @@ public class RayCaster {
 	};
 
 	private char getBlockRelative(int x, int y, WorldRotation rot) {
+		int px = (int)playerX, py = (int)playerY, tmp;
+
+		// Translate the requested world coordinates to the player's origin
+
+		x -= px;
+		y -= py;
+
+		// Rotate the world coordinates around the player
+
+		switch(rot) {
+			case DEG_0:
+				// Do nothing
+				break;
+
+			case DEG_90:
+				tmp = y;
+
+				y = x;
+				x = -tmp;
+				break;
+
+			case DEG_180:
+				x *= -1;
+				y *= -1;
+				break;
+
+			case DEG_270:
+				tmp = y;
+
+				y = -x;
+				x = tmp;
+				break;
+		}
+
+		// Translate the rotated coordinates back to world coordinates
+
+		x += px;
+		y += py;
+
 		return getBlock(x, y);
 	}
 
 	private void calculateRayDistance(RayCasterResult retval, double deltaX, double deltaY, WorldRotation rot) {
 		double posX = 0, posY = 0, oldPosX, oldPosY;
 		double toTravelX = 0, toTravelY = 0;
+
+		// TODO - rotate the player inside the square they are currently in
 
 		retval.wallColor = 0xFFFFFF;
 		retval.distance = 0;
@@ -123,20 +164,29 @@ public class RayCaster {
 			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
 			double angle = playerAngle + relangle;
 
-			while(angle > Math.PI) angle -= Math.PI * 2;
+			// Limit the angle to [-π/4; π/4], keep track of the quadrant
 
-			if(angle <= -Math.PI / 4 || angle >= Math.PI / 4) {
-				drawColumn(x, 0, 0x000000, 0x000000, 0xFF0000);
-				continue;
+			int quadrant = 0;
+
+			while(angle < Math.PI / 4) {
+				angle += Math.PI / 2;
+				quadrant--;
 			}
+
+			while(angle > Math.PI / 4) {
+				angle -= Math.PI / 2;
+				quadrant++;
+			}
+
+			// Force the quadrant integer to be non-negative (otherwise we would get negative array indices)
+
+			while(quadrant < 0) quadrant += 4;
 
 			double horizUnitDeltaY = Math.tan(angle);
 
-			if(debugOutput) System.err.printf("%d: angle %f, Y delta %f\n", x, angle, horizUnitDeltaY);
+			if(debugOutput) System.err.printf("%d: angle %f, quadrant %d (%d), Y delta %f\n", x, angle, quadrant, quadrant % 4, horizUnitDeltaY);
 
-			// TODO - finish the other quadrants
-
-			calculateRayDistance(rayResult, 1, horizUnitDeltaY, WorldRotation.DEG_0);
+			calculateRayDistance(rayResult, 1, horizUnitDeltaY, WorldRotation.values()[quadrant % 4]);
 
 			// Perform fish-eye correction
 
