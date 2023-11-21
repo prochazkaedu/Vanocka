@@ -123,6 +123,8 @@ public class RayCaster {
 			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
 			double angle = playerAngle + relangle;
 
+			while(angle > Math.PI) angle -= Math.PI * 2;
+
 			if(angle <= -Math.PI / 4 || angle >= Math.PI / 4) {
 				drawColumn(x, 0, 0x000000, 0x000000, 0xFF0000);
 				continue;
