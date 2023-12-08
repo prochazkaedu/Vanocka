@@ -33,14 +33,7 @@ public class RayCaster {
 		return map.map[y][x];
 	}
 
-	private enum WorldRotation {
-		DEG_0,
-		DEG_90,
-		DEG_180,
-		DEG_270
-	};
-
-	private char getBlockRelative(int x, int y, WorldRotation rot) {
+	private char getBlockRelative(int x, int y, int rot) {
 		int px = (int)playerX, py = (int)playerY, tmp;
 
 		// Translate the requested world coordinates to the player's origin
@@ -51,23 +44,23 @@ public class RayCaster {
 		// Rotate the world coordinates around the player
 
 		switch(rot) {
-			case DEG_0:
+			case 0: // 0 deg
 				// Do nothing
 				break;
 
-			case DEG_90:
+			case 1: // 90 deg
 				tmp = y;
 
 				y = x;
 				x = -tmp;
 				break;
 
-			case DEG_180:
+			case 2: // 180 deg
 				x *= -1;
 				y *= -1;
 				break;
 
-			case DEG_270:
+			case 3: // 270 deg
 				tmp = y;
 
 				y = -x;
@@ -83,7 +76,7 @@ public class RayCaster {
 		return getBlock(x, y);
 	}
 
-	private void calculateRayDistance(RayCasterResult retval, double deltaX, double deltaY, WorldRotation rot) {
+	private void calculateRayDistance(RayCasterResult retval, double deltaX, double deltaY, int rot) {
 		double posX = 0, posY = 0, oldPosX, oldPosY;
 		double toTravelX = 0, toTravelY = 0;
 
@@ -134,7 +127,7 @@ public class RayCaster {
 					posX = oldPosX + toTravelX * ratio;
 					posY = oldPosY + toTravelY * ratio;
 					
-					if(rot == WorldRotation.DEG_0 || rot == WorldRotation.DEG_180) retval.wallColor = 0xE0E0E0;
+					if(rot % 2 == 0) retval.wallColor = 0xE0E0E0;
 					break;
 				}
 			}
@@ -143,7 +136,7 @@ public class RayCaster {
 				if(debugOutput) System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n",
 					posX, posY, (int)posX, (int)posY);
 
-				if(rot == WorldRotation.DEG_90 || rot == WorldRotation.DEG_270) retval.wallColor = 0xE0E0E0;
+				if(rot % 2 == 1) retval.wallColor = 0xE0E0E0;
 				break;
 			}
 
@@ -186,7 +179,7 @@ public class RayCaster {
 
 			if(debugOutput) System.err.printf("%d: angle %f, quadrant %d (%d), Y delta %f\n", x, angle, quadrant, quadrant % 4, horizUnitDeltaY);
 
-			calculateRayDistance(rayResult, 1, horizUnitDeltaY, WorldRotation.values()[quadrant % 4]);
+			calculateRayDistance(rayResult, 1, horizUnitDeltaY, quadrant % 4);
 
 			// Perform fish-eye correction
 
