@@ -80,17 +80,33 @@ public class RayCaster {
 		double posX = 0, posY = 0, oldPosX, oldPosY;
 		double toTravelX = 0, toTravelY = 0;
 
-		// TODO - rotate the player inside the square they are currently in
-
 		retval.wallColor = 0xFFFFFF;
 		retval.distance = 0;
 
 		if(debugOutput) System.err.printf("- Incrementing X by %f, Y by %f.\n", deltaX, deltaY);
+		
+		// Rotate the player inside the square they are currently in
 
-		posX = playerX;
-		posY = playerY;
+		double correctedPlayerX = (int)playerX;
+		double correctedPlayerY = (int)playerY;
 
-		toTravelX = Math.floor(playerX + 1) - playerX;
+		double fracPlayerX = correctedPlayerX - ((int)correctedPlayerX) - .5;
+		double fracPlayerY = correctedPlayerY - ((int)correctedPlayerY) - .5;
+
+		double angle = -((double)rot) * Math.PI / 2;
+
+		double tmp = fracPlayerX;
+		fracPlayerX = tmp * Math.cos(angle) - fracPlayerY * Math.sin(angle);
+		fracPlayerY = tmp * Math.sin(angle) + fracPlayerY * Math.cos(angle);
+
+		correctedPlayerX += fracPlayerX + .5;
+		correctedPlayerY += fracPlayerY + .5;
+
+		posX = correctedPlayerX;
+		posY = correctedPlayerY;
+
+
+		toTravelX = Math.floor(correctedPlayerX + 1) - correctedPlayerX;
 		toTravelY = deltaY * toTravelX / deltaX;
 
 		if(debugOutput) System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
@@ -144,7 +160,7 @@ public class RayCaster {
 			toTravelY = deltaY;
 		}
 
-		retval.distance = Math.hypot(playerX - posX, playerY - posY);
+		retval.distance = Math.hypot(correctedPlayerX - posX, correctedPlayerY - posY);
 
 		if(debugOutput) System.err.printf(" *** RESULT DISTANCE = %f, COLOR = 0x%06X\n", retval.distance, retval.wallColor);
 	}
