@@ -5,10 +5,13 @@ public class FrameBuffer {
 	public int w, h;
 	public int pixels[][];
 
-	private char[] renderstring;
+	private char[] renderstring, renderstringbackup;
 	private long start = 0;
 	public long msPerFrame = 40;
 	public boolean printDebug = true;
+
+	public int textCursorX = 0, textCursorY = 0;
+	public int textForegroundColor = 0xFFFFFF, textBackgroundColor = 0x000000;
 
 	public FrameBuffer(int _w, int _h, long _msPerFrame, boolean _printDebug) {
 		this(_w, _h);
@@ -47,8 +50,38 @@ public class FrameBuffer {
 		output += "\033[0m\033[?25h";
 
 		renderstring = output.toCharArray();
+		renderstringbackup = output.toCharArray();
 
 		start = System.currentTimeMillis();
+	}
+
+	public void writeText(char c) {
+		int ptr = 21 + 31 + textCursorY * (physicalWidth * 39 + 8) + textCursorX * 39;
+
+		renderstring[ptr] = c;
+		pixels[textCursorX][textCursorY * 2] = textBackgroundColor;
+		pixels[textCursorX][textCursorY * 2 + 1] = textForegroundColor;
+
+		textCursorX++;
+
+		if(textCursorX >= physicalWidth) {
+			textCursorX = 0;
+			textCursorY++;
+
+			if(textCursorY >= physicalHeight) {
+				textCursorY = 0;
+			}
+		}
+	}
+
+	public void writeText(String str) {
+		for(int i = 0; i < str.length(); i++) {
+			writeText(str.charAt(i));
+		}
+	}
+
+	public void removeText() {
+		System.arraycopy(renderstringbackup, 0, renderstring, 0, renderstringbackup.length);
 	}
 
 	public void update() {
