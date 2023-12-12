@@ -2,15 +2,18 @@ package eu.prochazkaml.vanocka;
 
 public class TestScreen {
 	public FrameBuffer fb;
+	public String msg;
 	
 	private int frame = 0;
-	private String msg = "Stiskněte libovolné tlačítko na ovladači.";
 	private int fg = 0xFFFFFF, bg = 0x800000;
 
-	public TestScreen(FrameBuffer _fb) {
+	public TestScreen(FrameBuffer _fb, String _msg) {
 		fb = _fb;
 		fb.textForegroundColor = fg;
 		fb.textBackgroundColor = bg;
+		fb.removeText();
+
+		msg = _msg;
 	}
 
 	public void render() {
