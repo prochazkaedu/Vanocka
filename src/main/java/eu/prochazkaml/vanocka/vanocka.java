@@ -72,6 +72,9 @@ public class vanocka {
 			fadeAccel[i] = Math.random() / 20 + .02;
 		}
 
+		MusicPlayer mp = new MusicPlayer("assets/e2m1.mid");
+		mp.start();
+
 		while(true) {
 			testCaster.render();
 
@@ -101,7 +104,7 @@ public class vanocka {
 			fb.updateLimited();
 
 			System.out.println();
-			System.out.printf("%f %f %f", testCaster.playerAngle, testCaster.playerX, testCaster.playerY);
+			System.out.printf("angle: %f | x: %f | y: %f               ", testCaster.playerAngle, testCaster.playerX, testCaster.playerY);
 		}
 	}
 }
