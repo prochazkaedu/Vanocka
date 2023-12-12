@@ -90,8 +90,8 @@ public class RayCaster {
 		double correctedPlayerX = (int)playerX;
 		double correctedPlayerY = (int)playerY;
 
-		double fracPlayerX = correctedPlayerX - ((int)correctedPlayerX) - .5;
-		double fracPlayerY = correctedPlayerY - ((int)correctedPlayerY) - .5;
+		double fracPlayerX = playerX - correctedPlayerX - .5;
+		double fracPlayerY = playerY - correctedPlayerY - .5;
 
 		double angle = -((double)rot) * Math.PI / 2;
 
@@ -104,7 +104,6 @@ public class RayCaster {
 
 		posX = correctedPlayerX;
 		posY = correctedPlayerY;
-
 
 		toTravelX = Math.floor(correctedPlayerX + 1) - correctedPlayerX;
 		toTravelY = deltaY * toTravelX / deltaX;
