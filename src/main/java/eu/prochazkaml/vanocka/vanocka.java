@@ -66,41 +66,14 @@ public class vanocka {
 
 		joystick.setupStep = -1;
 
-		// Cool fade effect
-
-		int[][] fadePixels = new int[fb.pixels.length][];
-		double[] fadePos = new double[fadePixels.length];
-		double[] fadeSpeed = new double[fadePixels.length];
-		double[] fadeAccel = new double[fadePixels.length];
-
-		for(int i = 0; i < fadePixels.length; i++) {
-			fadePixels[i] = fb.pixels[i].clone();
-			fadePos[i] = 0;
-			fadeSpeed[i] = 1;
-			fadeAccel[i] = Math.random() / 20 + .02;
-		}
+		ScreenFader fader = new ScreenFader(fb);
 
 		MusicPlayer mp = new MusicPlayer("assets/e2m1.mid");
 		mp.start();
 
 		while(true) {
 			testCaster.render();
-
-			for(int i = 0; i < fadePixels.length; i++) {
-				if(fadePos[i] > fb.h) continue;
-
-				int dest = (int)fadePos[i];
-				if(dest < 0) dest = 0;
-
-				for(int j = 0; j < fadePixels[i].length; j++) {
-					if(j + dest >= fb.h) break;
-
-					fb.pixels[i][j + dest] = fadePixels[i][j];
-				}
-
-				fadePos[i] += fadeSpeed[i];
-				fadeSpeed[i] += fadeAccel[i];
-			}
+			fader.process();
 
 			testCaster.playerAngle += joystick.rot / 30.f;
 
