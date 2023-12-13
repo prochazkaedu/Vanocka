@@ -4,7 +4,8 @@ public class vanocka {
 	public static void main(String[] args) throws InterruptedException {
 		FrameBuffer fb = new FrameBuffer(80, 24, 20);
 
-		RayCasterMap testMap = new RayCasterMap(10, 10, 4.7, 4.1, -Math.PI / 4, new char[][] {
+		//RayCasterMap testMap = new RayCasterMap(10, 10, 6.5, 3.5, -Math.PI / 4, new char[][] {
+		RayCasterMap testMap = new RayCasterMap(10, 10, 5, 2.5, 1, new char[][] {
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
 			{ '#', '.', '.', '.', '.', '.', '.', '.', '.', '#' },
 			{ '#', '.', '#', '.', '.', '.', '.', '#', '.', '#' },
@@ -18,8 +19,15 @@ public class vanocka {
 		});
 
 		boolean debugOutput = false;
+		boolean rendersingleframe = false;
 
-		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3.f, debugOutput);
+		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3, debugOutput);
+
+		if(rendersingleframe) {
+			testCaster.render();
+			fb.update();
+			return;
+		}
 
 		if(debugOutput) {
 			testCaster.render();
