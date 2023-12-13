@@ -28,7 +28,7 @@ public class RayCaster {
 
 	private char getBlock(int x, int y) {
 		//System.out.printf("Read block %d/%d %f\n", x, y, playerX);
-		if(x >= map.w || y >= map.h || x < 0 || y < 0) return '0';
+		if(x >= map.w || y >= map.h || x < 0 || y < 0) return '#';
 
 		return map.map[y][x];
 	}
@@ -237,6 +237,8 @@ public class RayCaster {
 	}
 
 	int interpolateColours(int col1, int col2, double frac) {
+		if(frac < 0.f) frac = 0.f;
+
 		int r1 = col1 >> 16, g1 = (col1 >> 8) & 0xFF, b1 = col1 & 0xFF;
 		int r2 = col2 >> 16, g2 = (col2 >> 8) & 0xFF, b2 = col2 & 0xFF;
 
