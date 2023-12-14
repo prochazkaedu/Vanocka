@@ -5,6 +5,7 @@ import eu.prochazkaml.vanocka.JoystickThread;
 import eu.prochazkaml.vanocka.ScreenFader;
 import eu.prochazkaml.vanocka.MusicPlayer;
 import eu.prochazkaml.vanocka.RayCaster;
+import eu.prochazkaml.vanocka.RayCasterColorMap;
 import eu.prochazkaml.vanocka.RayCasterMap;
 
 public class Maze {
@@ -13,7 +14,7 @@ public class Maze {
 		RayCasterMap testMap = new RayCasterMap(10, 10, 5, 2.5, 1, new char[][] {
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
 			{ '#', '.', '.', '.', '.', '.', '.', '.', '.', '#' },
-			{ '#', '.', '#', '.', '.', '.', '.', '#', '.', '#' },
+			{ '#', '.', '#', '.', '.', '.', '.', '?', '.', '#' },
 			{ '#', '.', '.', '.', '.', '.', '.', '.', '.', '#' },
 			{ '#', '.', '.', '.', '.', '.', '.', '.', '.', '#' },
 			{ '#', '.', '.', '.', '.', '.', '.', '#', '.', '#' },
@@ -21,6 +22,9 @@ public class Maze {
 			{ '#', '.', '.', '.', '.', '.', '.', '#', '.', '#' },
 			{ '#', '#', '.', '.', '.', '.', '.', '.', '.', '#' },
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
+		}, new RayCasterColorMap[] {
+			new RayCasterColorMap('#', 0x008000, 0x006000),
+			new RayCasterColorMap('?', 0xFF8000, 0xE06000)
 		});
 
 		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3, debugOutput);

@@ -76,12 +76,23 @@ public class RayCaster {
 		return getBlock(x, y);
 	}
 
+	private int mapBlockToColor(char block, boolean primary) {
+		for(int i = 0; i < map.colorMap.length; i++) {
+			if(block == map.colorMap[i].id)
+				return primary ? map.colorMap[i].color1 : map.colorMap[i].color2;
+		}
+
+		return 0xFF0000;
+	}
+
 	private void calculateRayDistance(RayCasterResult retval, double deltaX, double deltaY, int rot) {
 		double posX = 0, posY = 0, oldPosX, oldPosY;
 		double toTravelX = 0, toTravelY = 0;
 
-		retval.wallColor = 0x008000;
+		retval.wallColor = 0xFF0000;
 		retval.distance = 0;
+
+		char block;
 
 		if(debugOutput) System.err.printf("- Incrementing X by %f, Y by %f.\n", deltaX, deltaY);
 		
@@ -135,23 +146,23 @@ public class RayCaster {
 
 				if(debugOutput) System.err.printf("   - ratio = %f (%f / %d)\n", ratio, oldPosY, (int)(oldPosY));
 
-				if(getBlockRelative((int)oldPosX, (int)posY, rot) != '.') {
+				if((block = getBlockRelative((int)oldPosX, (int)posY, rot)) != '.') {
 					if(debugOutput) System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d)\n",
 						posX, posY, (int)oldPosX, (int)posY);
 					
 					posX = oldPosX + toTravelX * ratio;
 					posY = oldPosY + toTravelY * ratio;
 					
-					if(rot % 2 == 0) retval.wallColor = 0x006000;
+					retval.wallColor = mapBlockToColor(block, rot % 2 == 0);
 					break;
 				}
 			}
 
-			if(getBlockRelative((int)posX, (int)posY, rot) != '.') {
+			if((block = getBlockRelative((int)posX, (int)posY, rot)) != '.') {
 				if(debugOutput) System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n",
 					posX, posY, (int)posX, (int)posY);
 
-				if(rot % 2 == 1) retval.wallColor = 0x006000;
+				retval.wallColor = mapBlockToColor(block, rot % 2 == 1);
 				break;
 			}
 
