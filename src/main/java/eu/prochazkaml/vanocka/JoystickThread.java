@@ -5,6 +5,7 @@ public class JoystickThread extends Thread {
 	public boolean joystickActive = false;
 	
 	public double xmove = 0, ymove = 0, rot = 0;
+	public int buttonsPressed = 0;
 
 	/*
 	 * -1 = setup has finished
@@ -93,6 +94,10 @@ public class JoystickThread extends Thread {
 						break;
 				}
 			} else if(setupStep == -1) {
+				// If it is a button event, increment the counter
+
+				if(ev.type == 1 && ev.value == 1) buttonsPressed++;
+
 				// Parse joystick event
 
 				for(int i = 0; i < 6; i++) {
