@@ -36,10 +36,16 @@ public class JoystickThread extends Thread {
 			setupData[i] = new SetupData();
 		}
 
-		try {
-			in = new DataInputStream(new BufferedInputStream(new FileInputStream("/dev/input/js0")));
-		} catch(FileNotFoundException e) {
-			System.out.println("Ovladač nenalezen.");
+		System.out.println("Prosím připojte ovladač.");
+
+		while(true) {
+			try {
+				in = new DataInputStream(new BufferedInputStream(new FileInputStream("/dev/input/js0")));
+			} catch(FileNotFoundException e) {
+				continue;
+			}
+
+			break;
 		}
 
 		joystickActive = true;
