@@ -27,6 +27,8 @@ public class MusicPlayer extends Thread {
             sequencer.setSequence(MidiSystem.getSequence(midiFile));
             sequencer.open();
             sequencer.start();
+            sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+
             while(!Thread.currentThread().isInterrupted()) {
                 if(sequencer.isRunning()) {
                     try {
