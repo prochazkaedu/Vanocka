@@ -80,7 +80,7 @@ public class RayCaster {
 		double posX = 0, posY = 0, oldPosX, oldPosY;
 		double toTravelX = 0, toTravelY = 0;
 
-		retval.wallColor = 0xFFFFFF;
+		retval.wallColor = 0x008000;
 		retval.distance = 0;
 
 		if(debugOutput) System.err.printf("- Incrementing X by %f, Y by %f.\n", deltaX, deltaY);
@@ -142,7 +142,7 @@ public class RayCaster {
 					posX = oldPosX + toTravelX * ratio;
 					posY = oldPosY + toTravelY * ratio;
 					
-					if(rot % 2 == 0) retval.wallColor = 0xE0E0E0;
+					if(rot % 2 == 0) retval.wallColor = 0x006000;
 					break;
 				}
 			}
@@ -151,7 +151,7 @@ public class RayCaster {
 				if(debugOutput) System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n",
 					posX, posY, (int)posX, (int)posY);
 
-				if(rot % 2 == 1) retval.wallColor = 0xE0E0E0;
+				if(rot % 2 == 1) retval.wallColor = 0x006000;
 				break;
 			}
 
@@ -202,7 +202,7 @@ public class RayCaster {
 
 			// Render this column of pixels
 
-			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x808080, 0x404040, rayResult.wallColor);
+			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x8080FF, 0xE0E0E0, rayResult.wallColor);
 
 			// System.err.printf("%d: %.02f %f\n", x, angle, distance);
 		}
