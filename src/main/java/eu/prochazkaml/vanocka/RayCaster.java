@@ -28,7 +28,7 @@ public class RayCaster {
 
 	private char getBlock(int x, int y) {
 		//System.out.printf("Read block %d/%d %f\n", x, y, playerX);
-		if(x >= map.w || y >= map.h || x < 0 || y < 0) return '#';
+		if(x >= map.w || y >= map.h || x < 0 || y < 0) return '.';
 
 		return map.map[y][x];
 	}
