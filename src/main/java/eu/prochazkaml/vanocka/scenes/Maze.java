@@ -3,7 +3,6 @@ package eu.prochazkaml.vanocka.scenes;
 import eu.prochazkaml.vanocka.FrameBuffer;
 import eu.prochazkaml.vanocka.JoystickThread;
 import eu.prochazkaml.vanocka.ScreenFader;
-import eu.prochazkaml.vanocka.MusicPlayer;
 import eu.prochazkaml.vanocka.RayCaster;
 import eu.prochazkaml.vanocka.RayCasterColorMap;
 import eu.prochazkaml.vanocka.RayCasterMap;
@@ -74,9 +73,6 @@ public class Maze {
 
 		ScreenFader fader = new ScreenFader(fb);
 
-		MusicPlayer mp = new MusicPlayer("assets/e2m1.mid");
-		mp.start();
-
 		while(true) {
 			testCaster.render();
 			fader.process();
@@ -84,6 +80,9 @@ public class Maze {
 			fb.updateLimited();
 
 			testCaster.handleMovement(joystick);
+
+			if(testCaster.playerX >= 17.f && testCaster.playerX < 19.f && testCaster.playerY >= 33.f && testCaster.playerY < 34.f)
+				break;
 
 			System.out.println();
 			System.out.printf("angle: %f | x: %f | y: %f               ", testCaster.playerAngle, testCaster.playerX, testCaster.playerY);
