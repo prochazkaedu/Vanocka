@@ -8,8 +8,9 @@ public class RayCaster {
 	public final double playerFOV;
 	public final int vw, vh;
 	public final boolean debugOutput;
+	public final double playerRadius;
 
-	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV, boolean _debugOutput) {
+	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV, double _playerRadius, boolean _debugOutput) {
 		fb = _fb;
 		map = _map;
 		vw = _viewportWidth;
@@ -20,10 +21,11 @@ public class RayCaster {
 		playerY = map.playerSpawnY;
 		playerAngle = map.playerAngle;
 		playerFOV = _playerFOV;
+		playerRadius = _playerRadius;
 	}
 
-	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV) {
-		this(_fb, _map, _viewportWidth, _viewportHeight, _playerFOV, false);
+	public RayCaster(FrameBuffer _fb, RayCasterMap _map, int _viewportWidth, int _viewportHeight, double _playerFOV, double _playerRadius) {
+		this(_fb, _map, _viewportWidth, _viewportHeight, _playerFOV, _playerRadius, false);
 	}
 
 	private char getBlock(int x, int y) {
@@ -124,6 +126,85 @@ public class RayCaster {
 			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), map.colorCeiling, map.colorFloor, rayResult.wallColor);
 
 			// System.err.printf("%d: %.02f %f\n", x, angle, distance);
+		}
+	}
+
+	private boolean inRightSideBorder() {
+		return playerX - Math.floor(playerX) > (1 - playerRadius);
+	}
+
+	private boolean inLeftSideBorder() {
+		return playerX - Math.floor(playerX) < playerRadius;
+	}
+
+	private boolean inUpperBorder() {
+		return playerY - Math.floor(playerY) < playerRadius;
+	}
+
+	private boolean inLowerBorder() {
+		return playerY - Math.floor(playerY) > (1 - playerRadius);
+	}
+
+	private boolean isNearbyWall(int dx, int dy) {
+		return getBlock((int)playerX + dx, (int)playerY + dy) != '.';
+	}
+
+	public void handleMovement(JoystickThread joystick) {
+		// Move a specific amount in the given direction
+
+		playerAngle += joystick.rot / 30.f;
+
+		double dx = joystick.xmove / 25.f, dy = -joystick.ymove / 25.f;
+
+		playerX += Math.cos(playerAngle) * dy - Math.sin(playerAngle) * dx;
+		playerY += Math.sin(playerAngle) * dy + Math.cos(playerAngle) * dx;
+
+		// Handle collision detection
+
+		boolean clipUpper = false, clipLower = false, clipLeftSide = false, clipRightSide = false;
+
+		if(inUpperBorder() && inRightSideBorder() && isNearbyWall(1, -1)) {
+			if((Math.ceil(playerY) - playerY) < (playerX - Math.floor(playerX)))
+				clipUpper = true;
+			else
+				clipRightSide = true;
+		}
+
+		if(inUpperBorder() && inLeftSideBorder() && isNearbyWall(-1, -1)) {
+			if((Math.ceil(playerY) - playerY) < (Math.ceil(playerX) - playerX))
+				clipUpper = true;
+			else
+				clipLeftSide = true;
+		}
+
+		if(inLowerBorder() && inRightSideBorder() && isNearbyWall(1, 1)) {
+			if((playerY - Math.floor(playerY)) < (playerX - Math.floor(playerX)))
+				clipLower = true;
+			else
+				clipRightSide = true;
+		}
+
+		if(inLowerBorder() && inLeftSideBorder() && isNearbyWall(-1, 1)) {
+			if((playerY - Math.floor(playerY)) < (Math.ceil(playerX) - playerX))
+				clipLower = true;
+			else
+				clipLeftSide = true;			
+		}
+
+		if(clipRightSide || (inRightSideBorder() && isNearbyWall(1, 0))) {
+			playerX = Math.ceil(playerX) - playerRadius;
+		}
+
+		if(clipLeftSide || (inLeftSideBorder() && isNearbyWall(-1, 0))) {
+			playerX = Math.floor(playerX) + playerRadius;
+		}
+
+		if(clipUpper || (inUpperBorder() && isNearbyWall(0, -1))) {
+			playerY = Math.floor(playerY) + playerRadius;
+		}
+
+		if(clipLower || (inLowerBorder() && isNearbyWall(0, 1))) {
+			playerY = Math.ceil(playerY) - playerRadius;
 		}
 	}
 

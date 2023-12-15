@@ -27,7 +27,7 @@ public class Maze {
 			new RayCasterColorMap('?', 0xFF8000, 0xE06000)
 		});
 
-		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3, debugOutput);
+		RayCaster testCaster = new RayCaster(fb, testMap, fb.w, fb.h, Math.PI / 3, .3, debugOutput);
 
 		if(renderSingleFrame) {
 			testCaster.render();
@@ -49,14 +49,9 @@ public class Maze {
 			testCaster.render();
 			fader.process();
 
-			testCaster.playerAngle += joystick.rot / 30.f;
-
-			double dx = joystick.xmove / 25.f, dy = -joystick.ymove / 25.f;
-
-			testCaster.playerX += Math.cos(testCaster.playerAngle) * dy - Math.sin(testCaster.playerAngle) * dx;
-			testCaster.playerY += Math.sin(testCaster.playerAngle) * dy + Math.cos(testCaster.playerAngle) * dx;
-			
 			fb.updateLimited();
+
+			testCaster.handleMovement(joystick);
 
 			System.out.println();
 			System.out.printf("angle: %f | x: %f | y: %f               ", testCaster.playerAngle, testCaster.playerX, testCaster.playerY);
