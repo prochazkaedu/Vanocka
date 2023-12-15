@@ -49,7 +49,6 @@ public class RayCaster {
 		double y1 = playerY;
 		double x2 = playerX + Math.cos(angle) * map.w * 2;
 		double y2 = playerY + Math.sin(angle) * map.h * 2;
-		double x3, y3, x4, y4;
 		double t, u, dx, dy, tmpdist;
 
 		char block;
@@ -59,16 +58,9 @@ public class RayCaster {
 
 		// Find grid intersections in the X direction
 
-		y3 = 0;
-		y4 = map.h;
-
-		for(x3 = 0; x3 <= map.w; x3++) {
-			// TODO - OPTIMIZE THIS!
-
-			x4 = x3;
-
-			t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-			u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+		for(double x3 = 0; x3 <= map.w; x3++) {
+			t = ((x1 - x3) * map.h) / ((x1 - x2) * map.h);
+			u = (y1 * (x1 - x2) - (x1 - x3) * (y1 - y2)) / ((x1 - x2) * map.h);
 
 			if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
 				// Intersection valid, calculate point and check if block is there
@@ -89,16 +81,9 @@ public class RayCaster {
 
 		// Find grid intersections in the Y direction
 
-		x3 = 0;
-		x4 = map.w;
-
-		for(y3 = 0; y3 <= map.h; y3++) {
-			// TODO - OPTIMIZE THIS!
-
-			y4 = y3;
-
-			t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-			u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+		for(double y3 = 0; y3 <= map.h; y3++) {
+			t = ((y1 - y3) * map.w) / ((y1 - y2) * map.w);
+			u = (x1 * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((y1 - y2) * map.w);
 
 			if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
 				// Intersection valid, calculate point and check if block is there
