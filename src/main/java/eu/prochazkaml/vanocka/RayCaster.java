@@ -33,49 +33,6 @@ public class RayCaster {
 		return map.map[y][x];
 	}
 
-	private char getBlockRelative(int x, int y, int rot) {
-		int px = (int)playerX, py = (int)playerY, tmp;
-
-		// Translate the requested world coordinates to the player's origin
-
-		x -= px;
-		y -= py;
-
-		// Rotate the world coordinates around the player
-
-		switch(rot) {
-			case 0: // 0 deg
-				// Do nothing
-				break;
-
-			case 1: // 90 deg
-				tmp = y;
-
-				y = x;
-				x = -tmp;
-				break;
-
-			case 2: // 180 deg
-				x *= -1;
-				y *= -1;
-				break;
-
-			case 3: // 270 deg
-				tmp = y;
-
-				y = -x;
-				x = tmp;
-				break;
-		}
-
-		// Translate the rotated coordinates back to world coordinates
-
-		x += px;
-		y += py;
-
-		return getBlock(x, y);
-	}
-
 	private int mapBlockToColor(char block, boolean primary) {
 		for(int i = 0; i < map.colorMap.length; i++) {
 			if(block == map.colorMap[i].id)
@@ -85,94 +42,80 @@ public class RayCaster {
 		return 0xFF0000;
 	}
 
-	private void calculateRayDistance(RayCasterResult retval, double deltaX, double deltaY, int rot) {
-		double posX = 0, posY = 0, oldPosX, oldPosY;
-		double toTravelX = 0, toTravelY = 0;
+	private void calculateRayDistance(RayCasterResult retval, double angle) {
+		// https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
 
-		retval.wallColor = 0xFF0000;
-		retval.distance = 0;
+		double x1 = playerX;
+		double y1 = playerY;
+		double x2 = playerX + Math.cos(angle) * map.w * 2;
+		double y2 = playerY + Math.sin(angle) * map.h * 2;
+		double x3, y3, x4, y4;
+		double t, u, dx, dy, tmpdist;
 
 		char block;
 
-		if(debugOutput) System.err.printf("- Incrementing X by %f, Y by %f.\n", deltaX, deltaY);
-		
-		// Rotate the player inside the square they are currently in
+		retval.wallColor = 0xFF0000;
+		retval.distance = Double.POSITIVE_INFINITY;
 
-		double correctedPlayerX = (int)playerX;
-		double correctedPlayerY = (int)playerY;
+		// Find grid intersections in the X direction
 
-		double fracPlayerX = playerX - correctedPlayerX - .5;
-		double fracPlayerY = playerY - correctedPlayerY - .5;
+		y3 = 0;
+		y4 = map.h;
 
-		double angle = -((double)rot) * Math.PI / 2;
+		for(x3 = 0; x3 <= map.w; x3++) {
+			// TODO - OPTIMIZE THIS!
 
-		double tmp = fracPlayerX;
-		fracPlayerX = tmp * Math.cos(angle) - fracPlayerY * Math.sin(angle);
-		fracPlayerY = tmp * Math.sin(angle) + fracPlayerY * Math.cos(angle);
+			x4 = x3;
 
-		correctedPlayerX += fracPlayerX + .5;
-		correctedPlayerY += fracPlayerY + .5;
+			t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+			u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
 
-		posX = correctedPlayerX;
-		posY = correctedPlayerY;
+			if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+				// Intersection valid, calculate point and check if block is there
 
-		toTravelX = Math.floor(correctedPlayerX + 1) - correctedPlayerX;
-		toTravelY = deltaY * toTravelX / deltaX;
+				dx = t * (x2 - x1);
+				dy = t * (y2 - y1);
 
-		if(debugOutput) System.err.printf(" - First increment X by %f, Y by %f.\n", toTravelX, toTravelY);
+				tmpdist = Math.hypot(dx, dy);
 
-		while(true) {
-			oldPosX = posX;
-			oldPosY = posY;
+				if(tmpdist > retval.distance) continue;
 
-			posX += toTravelX;
-			posY += toTravelY;
-
-			if(debugOutput) System.err.printf("- %f/%f + %f/%f = %f/%f\n",
-				oldPosX, oldPosY,
-				toTravelX, toTravelY,
-				posX, posY);
-
-			if((int)oldPosY != (int)posY) {
-				if(debugOutput) System.err.printf(" - CROSSED HORIZONTAL BOUNDARY (%d/%d)\n", (int)oldPosX, (int)posY);
-
-				double ratio = 0;
-
-				if(toTravelY > 0) {
-					ratio = (((int)posY) - oldPosY) / toTravelY;
-				} else {
-					ratio = (((int)oldPosY) - oldPosY) / toTravelY;
-				}
-
-				if(debugOutput) System.err.printf("   - ratio = %f (%f / %d)\n", ratio, oldPosY, (int)(oldPosY));
-
-				if((block = getBlockRelative((int)oldPosX, (int)posY, rot)) != '.') {
-					if(debugOutput) System.err.printf(" - Reached horizontal wall at %f/%f (block %d/%d)\n",
-						posX, posY, (int)oldPosX, (int)posY);
-					
-					posX = oldPosX + toTravelX * ratio;
-					posY = oldPosY + toTravelY * ratio;
-					
-					retval.wallColor = mapBlockToColor(block, rot % 2 == 0);
-					break;
+				if((block = getBlock((int)Math.round(x1 + dx) - ((dx < 0) ? 1 : 0), (int)(y1 + dy))) != '.') {
+					retval.distance = tmpdist;
+					retval.wallColor = mapBlockToColor(block, true);
 				}
 			}
-
-			if((block = getBlockRelative((int)posX, (int)posY, rot)) != '.') {
-				if(debugOutput) System.err.printf(" - Reached vertical wall at %f/%f (block %d/%d)\n",
-					posX, posY, (int)posX, (int)posY);
-
-				retval.wallColor = mapBlockToColor(block, rot % 2 == 1);
-				break;
-			}
-
-			toTravelX = deltaX;
-			toTravelY = deltaY;
 		}
 
-		retval.distance = Math.hypot(correctedPlayerX - posX, correctedPlayerY - posY);
+		// Find grid intersections in the Y direction
 
-		if(debugOutput) System.err.printf(" *** RESULT DISTANCE = %f, COLOR = 0x%06X\n", retval.distance, retval.wallColor);
+		x3 = 0;
+		x4 = map.w;
+
+		for(y3 = 0; y3 <= map.h; y3++) {
+			// TODO - OPTIMIZE THIS!
+
+			y4 = y3;
+
+			t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+			u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
+
+			if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+				// Intersection valid, calculate point and check if block is there
+
+				dx = t * (x2 - x1);
+				dy = t * (y2 - y1);
+
+				tmpdist = Math.hypot(dx, dy);
+
+				if(tmpdist > retval.distance) continue;
+
+				if((block = getBlock((int)(x1 + dx), (int)Math.round(y1 + dy) - ((dy < 0) ? 1 : 0))) != '.') {
+					retval.distance = tmpdist;
+					retval.wallColor = mapBlockToColor(block, false);
+				}
+			}
+		}
 	}
 
 	public void render() {
@@ -183,29 +126,9 @@ public class RayCaster {
 			double relangle = playerFOV * (double)x / (double)vw - playerFOV / 2;
 			double angle = playerAngle + relangle;
 
-			// Limit the angle to [-π/4; π/4], keep track of the quadrant
+			if(debugOutput) System.err.printf("%d: angle %f (rel %f)\n", x, angle, relangle);
 
-			int quadrant = 0;
-
-			while(angle < Math.PI / 4) {
-				angle += Math.PI / 2;
-				quadrant--;
-			}
-
-			while(angle > Math.PI / 4) {
-				angle -= Math.PI / 2;
-				quadrant++;
-			}
-
-			// Force the quadrant integer to be non-negative (otherwise we would get negative array indices)
-
-			while(quadrant < 0) quadrant += 4;
-
-			double horizUnitDeltaY = Math.tan(angle);
-
-			if(debugOutput) System.err.printf("%d: angle %f, quadrant %d (%d), Y delta %f\n", x, angle, quadrant, quadrant % 4, horizUnitDeltaY);
-
-			calculateRayDistance(rayResult, 1, horizUnitDeltaY, quadrant % 4);
+			calculateRayDistance(rayResult, angle);
 
 			// Perform fish-eye correction
 
@@ -219,7 +142,7 @@ public class RayCaster {
 		}
 	}
 
-	void drawColumn(int x, double val, int colourCeiling, int colourFloor, int colourWall) {
+	private void drawColumn(int x, double val, int colourCeiling, int colourFloor, int colourWall) {
 		int intval = (int)val;
 		
 		colourWall = interpolateColours(colourWall, 0x808080, Math.min(val / 100, .5));
@@ -247,7 +170,7 @@ public class RayCaster {
 		}
 	}
 
-	int interpolateColours(int col1, int col2, double frac) {
+	private int interpolateColours(int col1, int col2, double frac) {
 		if(frac < 0.f) frac = 0.f;
 
 		int r1 = col1 >> 16, g1 = (col1 >> 8) & 0xFF, b1 = col1 & 0xFF;
