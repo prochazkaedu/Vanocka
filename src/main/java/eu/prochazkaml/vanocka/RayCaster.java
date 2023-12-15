@@ -55,7 +55,7 @@ public class RayCaster {
 
 		char block;
 
-		retval.wallColor = 0xFF0000;
+		retval.wallColor = map.colorFloor;
 		retval.distance = Double.POSITIVE_INFINITY;
 
 		// Find grid intersections in the X direction
