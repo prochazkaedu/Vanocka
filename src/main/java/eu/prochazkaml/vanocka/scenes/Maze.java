@@ -22,7 +22,7 @@ public class Maze {
 			{ '#', '.', '.', '.', '.', '.', '.', '#', '.', '#' },
 			{ '#', '#', '.', '.', '.', '.', '.', '.', '.', '#' },
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' }
-		}, new RayCasterColorMap[] {
+		}, 0x8080FF, 0xE0E0E0, new RayCasterColorMap[] {
 			new RayCasterColorMap('#', 0x008000, 0x006000),
 			new RayCasterColorMap('?', 0xFF8000, 0xE06000)
 		});

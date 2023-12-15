@@ -121,7 +121,7 @@ public class RayCaster {
 
 			// Render this column of pixels
 
-			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), 0x8080FF, 0xE0E0E0, rayResult.wallColor);
+			this.drawColumn(x, (1-1.f / distance) * (double)(fb.h / 2), map.colorCeiling, map.colorFloor, rayResult.wallColor);
 
 			// System.err.printf("%d: %.02f %f\n", x, angle, distance);
 		}
