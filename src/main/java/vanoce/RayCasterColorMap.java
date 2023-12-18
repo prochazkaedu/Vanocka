@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 public class RayCasterColorMap {
 	char id;

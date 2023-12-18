@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 public class RayCaster {
 	public FrameBuffer fb;

@@ -1,11 +1,11 @@
-package eu.prochazkaml.vanocka.scenes;
+package vanoce.scenes;
 
-import eu.prochazkaml.vanocka.FrameBuffer;
-import eu.prochazkaml.vanocka.JoystickThread;
-import eu.prochazkaml.vanocka.ScreenFader;
-import eu.prochazkaml.vanocka.RayCaster;
-import eu.prochazkaml.vanocka.RayCasterColorMap;
-import eu.prochazkaml.vanocka.RayCasterMap;
+import vanoce.FrameBuffer;
+import vanoce.JoystickThread;
+import vanoce.RayCaster;
+import vanoce.RayCasterColorMap;
+import vanoce.RayCasterMap;
+import vanoce.ScreenFader;
 
 public class Maze {
 	public static void run(FrameBuffer fb, JoystickThread joystick, boolean debugOutput, boolean renderSingleFrame) {

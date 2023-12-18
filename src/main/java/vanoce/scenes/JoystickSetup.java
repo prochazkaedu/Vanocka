@@ -1,7 +1,7 @@
-package eu.prochazkaml.vanocka.scenes;
-import eu.prochazkaml.vanocka.FrameBuffer;
-import eu.prochazkaml.vanocka.JoystickThread;
-import eu.prochazkaml.vanocka.TestScreen;
+package vanoce.scenes;
+import vanoce.FrameBuffer;
+import vanoce.JoystickThread;
+import vanoce.TestScreen;
 
 public class JoystickSetup {
 	public static void run(FrameBuffer fb, JoystickThread joystick) {

@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 // Provides a cool DOOM-like screen melt effect.
 // The constructor creates a copy of the current framebuffer contents, you just need to call process() after each rendered frame.

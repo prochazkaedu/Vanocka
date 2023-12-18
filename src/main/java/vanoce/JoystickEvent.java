@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 import java.io.*;
 
 // https://www.kernel.org/doc/Documentation/input/joystick-api.txt

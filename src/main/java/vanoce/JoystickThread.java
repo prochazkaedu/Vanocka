@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 import java.io.*;
 
 public class JoystickThread extends Thread {

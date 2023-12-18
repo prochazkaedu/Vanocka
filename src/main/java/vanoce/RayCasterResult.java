@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 public class RayCasterResult {
 	public int wallColor;

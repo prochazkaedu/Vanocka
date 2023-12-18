@@ -1,11 +1,11 @@
-package eu.prochazkaml.vanocka;
-
-import eu.prochazkaml.vanocka.scenes.JoystickSetup;
-import eu.prochazkaml.vanocka.scenes.StoryIntro;
-import eu.prochazkaml.vanocka.scenes.Maze;
-import eu.prochazkaml.vanocka.scenes.StoryOutro;
+package vanoce;
 
 import java.util.Scanner;
+
+import vanoce.scenes.JoystickSetup;
+import vanoce.scenes.Maze;
+import vanoce.scenes.StoryIntro;
+import vanoce.scenes.StoryOutro;
 
 public class Main {
 	public static void main(String[] args) {

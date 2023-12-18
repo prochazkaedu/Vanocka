@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 public class FrameBuffer {
 	public int physicalWidth, physicalHeight;

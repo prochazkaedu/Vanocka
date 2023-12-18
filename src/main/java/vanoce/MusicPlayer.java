@@ -1,4 +1,4 @@
-package eu.prochazkaml.vanocka;
+package vanoce;
 
 import javax.sound.midi.*;
 import java.io.*;
