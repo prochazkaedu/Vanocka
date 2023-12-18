@@ -5,7 +5,7 @@ import eu.prochazkaml.vanocka.scenes.StoryIntro;
 import eu.prochazkaml.vanocka.scenes.Maze;
 import eu.prochazkaml.vanocka.scenes.StoryOutro;
 
-public class vanocka {
+public class Main {
 	public static void main(String[] args) {
 		FrameBuffer fb = new FrameBuffer(80, 24, 20);
 
